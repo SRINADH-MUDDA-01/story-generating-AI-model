@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Story Generator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #141414; /* Dark background for Netflix-like feel */
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            background-color: rgba(0, 0, 0, 0.7); /* Dark semi-transparent background */
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+        }
+
+        select {
+            width: 80%;
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 12px 25px;
+            border: none;
+            background-color: #E50914; /* Netflix red color */
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #b20710; /* Darker red on hover */
+        }
+
+        button:disabled {
+            background-color: #444;
+        }
+
+        .story-card {
+            margin-top: 30px;
+            padding: 20px;
+            background: #222;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+            display: none;
+        }
+
+        #response {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #E50914;
+        }
+
+    </style>
+</head>
+<body>
+    <script type="importmap">
+        {
+        "imports": {
+            "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+    }
+    </script>
+    <div class="container">
+        <h1>AI Story Generator</h1>
+        
+        <!-- Language Selector -->
+        <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="bn">Bengali</option>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+            <option value="mr">Marathi</option>
+            <option value="gu">Gujarati</option>
+            <option value="kn">Kannada</option>
+            <option value="ml">Malayalam</option>
+        </select>
+
+        <input type="text" id="storyName" placeholder="Enter story name...">
+        <button id="generateBtn">Generate</button>
+        <div id="story-card" class="story-card"></div>
+        <p id="response">you story will be displayed here..</p>
+    </div>
+
+    <script type="module">
+        import { GoogleGenerativeAI } from "@google/generative-ai";
+        const genAI = new GoogleGenerativeAI("AIzaSyApjiwq2WSFazoH_7oeNm18SZO_BWqoKkw");
+
+        document.getElementById('generateBtn').addEventListener('click', async (event) => {
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const prompt = generatePrompt();
+            const language = document.getElementById('languageSelect').value;  // Get selected language
+
+            try {
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                const text = await response.text();
+                console.log(text);
+
+                // Display the result
+                document.getElementById('story-card').style.display = 'block'; // Show story card
+                document.getElementById('story-card').textContent = text;
+                document.getElementById('response').textContent = ""; // Clear any previous messages
+            } catch (error) {
+                console.error("Error fetching AI response:", error);
+                document.getElementById("response").innerText = "Failed to get recommendations. Try again.";
+            }
+        });
+
+        function generatePrompt() {
+            const story = document.getElementById("storyName").value;
+            const language = document.getElementById('languageSelect').value;
+            console.log(language);
+            // Adding language to the prompt for AI generation
+            return `Generate a captivating short story titled "${story}" in ${language}. The story should have a clear beginning, middle, and end, with engaging characters, a compelling plot, and immersive descriptions. Maintain a creative and engaging tone, suitable for a broad audience. give the response only in ${language}, generate the story of 200 lines`;
+        }
+    </script>
+</body>
+</html>
